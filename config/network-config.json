@@ -1,0 +1,156 @@
+{
+  "network": {
+    "name": "Halal Supply Chain Consortium",
+    "type": "private",
+    "version": "1.0.0",
+    "description": "Private consortium blockchain untuk pelacakan produk Halal"
+  },
+  "consortium": {
+    "name": "Halal Supply Chain Consortium",
+    "governance": "Multi-stakeholder",
+    "members": [
+      {
+        "id": "bpjph-001",
+        "name": "BPJPH",
+        "role": "regulator",
+        "endpoint": "http://localhost:3001",
+        "publicKey": "0xabc123...",
+        "permissions": ["certify", "audit", "validate"]
+      },
+      {
+        "id": "mui-001",
+        "name": "MUI",
+        "role": "certifier",
+        "endpoint": "http://localhost:3002",
+        "publicKey": "0xdef456...",
+        "permissions": ["certify", "validate"]
+      },
+      {
+        "id": "producer-001",
+        "name": "Produsen",
+        "role": "supplier",
+        "endpoint": "http://localhost:3003",
+        "publicKey": "0x789012...",
+        "permissions": ["add_product", "transfer"]
+      },
+      {
+        "id": "distributor-001",
+        "name": "Distributor",
+        "role": "distributor",
+        "endpoint": "http://localhost:3004",
+        "publicKey": "0x345678...",
+        "permissions": ["transfer", "verify"]
+      },
+      {
+        "id": "retailer-001",
+        "name": "Retailer",
+        "role": "retailer",
+        "endpoint": "http://localhost:3005",
+        "publicKey": "0x901234...",
+        "permissions": ["sell", "verify"]
+      }
+    ],
+    "consensus": {
+      "algorithm": "Proof of Work (Educational)",
+      "minNodes": 3,
+      "blockTime": 10,
+      "difficulty": 4
+    }
+  },
+  "blockchain": {
+    "genesisBlock": {
+      "index": 0,
+      "timestamp": "2024-01-01T00:00:00Z",
+      "transactions": [],
+      "previousHash": "0",
+      "nonce": 0,
+      "hash": "0x0000..."
+    },
+    "parameters": {
+      "blockReward": 100,
+      "maxBlockSize": 1048576,
+      "targetBlockTime": 10,
+      "transactionFee": 1
+    }
+  },
+  "zkp": {
+    "enabled": true,
+    "type": "simulated-zk-snarks",
+    "curve": "bn128",
+    "provingScheme": "groth16",
+    "circuitPath": "./backend/zkp/circuit.circom",
+    "verificationKeyPath": "./backend/zkp/verification_key.json",
+    "provingKeyPath": "./backend/zkp/proving_key.json",
+    "certifiedLocationsPath": "./backend/zkp/certified_locations.json"
+  },
+  "storage": {
+    "onChain": {
+      "type": "blockchain",
+      "maxSizeBytes": 1024,
+      "dataStored": ["hashes", "references", "timestamps", "commitments"]
+    },
+    "offChain": {
+      "type": "filesystem",
+      "path": "./data/offchain",
+      "maxSizeGB": 10,
+      "dataStored": ["product_details", "zkp_proofs", "certificates", "images"]
+    }
+  },
+  "api": {
+    "rest": {
+      "port": 3000,
+      "endpoints": [
+        "/api/blockchain/info",
+        "/api/blockchain/blocks",
+        "/api/transaction/add",
+        "/api/mine",
+        "/api/validate",
+        "/api/stats",
+        "/api/zkp/explain",
+        "/api/zkp/certified-locations",
+        "/api/zkp/test-fake-proof",
+        "/api/stress/send",
+        "/api/storage/info"
+      ]
+    },
+    "websocket": {
+      "enabled": false,
+      "port": 3001
+    }
+  },
+  "security": {
+    "tlsEnabled": false,
+    "apiKeyRequired": false,
+    "rateLimit": {
+      "enabled": true,
+      "windowMs": 60000,
+      "maxRequests": 100
+    },
+    "allowedOrigins": [
+      "http://localhost:3000",
+      "http://localhost:5500",
+      "http://127.0.0.1:3000"
+    ]
+  },
+  "deployment": {
+    "environment": "development",
+    "docker": {
+      "enabled": false,
+      "image": "supply-chain-halal:latest"
+    },
+    "cloud": {
+      "provider": "none",
+      "region": "ap-southeast-1"
+    }
+  },
+  "monitoring": {
+    "metrics": {
+      "enabled": true,
+      "endpoint": "/metrics"
+    },
+    "logging": {
+      "level": "info",
+      "file": "./logs/app.log"
+    }
+  }
+}

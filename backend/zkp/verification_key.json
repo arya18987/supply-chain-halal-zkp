@@ -1,0 +1,8 @@
+{
+  "protocol": "Simulated-ZKP",
+  "description": "This is a simulated ZKP system for educational purposes",
+  "publicParams": {
+    "curve": "bn128 (simulated)",
+    "proofType": "Groth16 (simulated)"
+  }
+}

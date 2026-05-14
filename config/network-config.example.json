@@ -1,0 +1,24 @@
+{
+  "network": {
+    "name": "Halal Supply Chain Consortium",
+    "type": "private",
+    "version": "1.0.0"
+  },
+  "consortium": {
+    "members": [
+      { "name": "BPJPH", "role": "regulator" },
+      { "name": "MUI", "role": "certifier" },
+      { "name": "Produsen", "role": "supplier" },
+      { "name": "Distributor", "role": "distributor" },
+      { "name": "Retailer", "role": "retailer" }
+    ]
+  },
+  "blockchain": {
+    "consensus": "Proof of Work",
+    "difficulty": 4
+  },
+  "zkp": {
+    "enabled": true,
+    "type": "simulated-zk-snarks"
+  }
+}

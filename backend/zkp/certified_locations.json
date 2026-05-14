@@ -1,0 +1,44 @@
+{
+  "locations": [
+    {
+      "id": "CERT-HALAL-001",
+      "name": "Peternakan Ayam Halal Sumber Makmur",
+      "address": "Kabupaten Malang, Jawa Timur",
+      "certifier": "MUI",
+      "certNumber": "MUI-2024-0001",
+      "validUntil": "2025-12-31",
+      "lat": -7.9818,
+      "lng": 112.6264
+    },
+    {
+      "id": "CERT-HALAL-002",
+      "name": "Rumah Potong Halal Berkah",
+      "address": "Kabupaten Sukabumi, Jawa Barat",
+      "certifier": "BPJPH",
+      "certNumber": "BPJPH-2024-0042",
+      "validUntil": "2026-06-30",
+      "lat": -6.9181,
+      "lng": 106.9268
+    },
+    {
+      "id": "CERT-HALAL-003",
+      "name": "Pabrik Pengolahan Halal Etis",
+      "address": "Kabupaten Semarang, Jawa Tengah",
+      "certifier": "MUI-BPJPH",
+      "certNumber": "MUI-BPJPH-2024-0789",
+      "validUntil": "2025-08-15",
+      "lat": -7.0051,
+      "lng": 110.4381
+    },
+    {
+      "id": "CERT-HALAL-004",
+      "name": "Lahan Pertanian Organik Halal",
+      "address": "Kabupaten Banyuwangi, Jawa Timur",
+      "certifier": "BPJPH",
+      "certNumber": "BPJPH-2024-0101",
+      "validUntil": "2026-03-20",
+      "lat": -8.2191,
+      "lng": 114.3689
+    }
+  ]
+}

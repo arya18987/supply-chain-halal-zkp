@@ -1,0 +1,31 @@
+{
+  "name": "supply-chain-halal",
+  "version": "1.0.0",
+  "description": "Halal Supply Chain with ZKP and PoW",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "test:stress": "node tests/stress-test.js",
+    "test:pentest": "node tests/penetration-test.js",
+    "test:zkp": "node tests/zkp-test.js",
+    "compile:circuit": "circom backend/zkp/circuit.circom --r1cs --wasm --sym",
+    "setup:zkp": "node backend/zkp/setup.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "express": "^4.18.2",
+    "ffjavascript": "^0.2.63",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.0-31",
+    "chai": "^4.3.10",
+    "jest": "^29.7.0",
+    "loadtest": "^5.2.0",
+    "mocha": "^10.2.0"
+  }
+}
