@@ -23,19 +23,49 @@ try {
                 proof: { commitment: 'fallback' },
                 publicSignals: { isValid: true },
                 generationTime: 10,
-                isCertified: locationData.id === 'CERT-HALAL-001'
+                isCertified: locationData?.id === 'CERT-HALAL-001'
             });
         }
         verifyProof(proof, signals) { return Promise.resolve(true); }
         generateFakeProof() { return Promise.resolve({ proof: {}, publicSignals: {} }); }
-        getCertifiedLocationsPublic() { return []; }
-        explainZKP() { return { whatIsZKP: 'Demo mode' }; }
+        getCertifiedLocationsPublic() { return [{ id: "CERT-HALAL-001", name: "Certified Halal Location" }]; }
+        explainZKP() { return { whatIsZKP: 'Demo mode', howItWorks: 'Simulated ZKP for demo', privacyGuarantee: 'Supplier identity protected', realWorldUse: 'Trade secret protection' }; }
     };
 }
 
 const app = express();
 
-// Middleware
+// ==================== INITIALIZE COMPONENTS ====================
+// INI YANG PALING PENTING - JANGAN SAMPAI TERLEWAT!
+let halalChain, zkpManager, onChainStorage, offChainStorage;
+
+try {
+    halalChain = new Blockchain();
+    zkpManager = new ZKPManager();
+    onChainStorage = new OnChainStorage();
+    offChainStorage = new OffChainStorage();
+    console.log('✅ Components initialized successfully');
+    console.log(`   Blockchain: ${halalChain.chain?.length || 0} blocks`);
+    console.log(`   ZKP Manager: Active`);
+    console.log(`   Storage: OnChain + OffChain`);
+} catch (error) {
+    console.error('❌ Error initializing components:', error.message);
+    // Fallback components
+    halalChain = { 
+        chain: [{ index: 0, hash: 'genesis', transactions: [] }], 
+        difficulty: 4, 
+        pendingTransactions: [],
+        consortiumNodes: ['BPJPH', 'MUI', 'Produsen', 'Distributor', 'Retailer'],
+        addTransaction: (tx) => { console.log('TX added (fallback)'); },
+        minePendingTransactions: (miner) => ({ index: 1, hash: 'mock', nonce: 12345, timestamp: Date.now(), transactions: [] }),
+        isChainValid: () => true
+    };
+    zkpManager = new ZKPManager();
+    onChainStorage = { getInfo: () => ({ size: 0, type: 'onchain' }) };
+    offChainStorage = { getInfo: () => ({ size: 0, type: 'offchain' }) };
+}
+
+// ==================== MIDDLEWARE ====================
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,19 +74,9 @@ app.use(express.urlencoded({ extended: true }));
 const frontendPath = path.join(__dirname, '../frontend');
 app.use(express.static(frontendPath));
 
-// Root endpoint - serve dashboard.html
-app.get('/', (req, res) => {
-    res.sendFile('dashboard.html', { root: frontendPath });
-});
+// ==================== ROUTES ====================
 
-// Explicit route untuk dashboard.html
-app.get('/dashboard.html', (req, res) => {
-    res.sendFile('dashboard.html', { root: frontendPath });
-});
-
-// ==================== API ROUTES ====================
-
-// Health check - PRIORITAS
+// Health check
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'healthy', 
@@ -70,23 +90,49 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Root endpoint
+// Root endpoint - HANYA SATU KALI!
 app.get('/', (req, res) => {
     try {
-        res.sendFile('dashboard.html', { root: path.join(__dirname, '../frontend') });
+        // Coba kirim dashboard.html dulu
+        const dashboardPath = path.join(frontendPath, 'dashboard.html');
+        if (require('fs').existsSync(dashboardPath)) {
+            res.sendFile('dashboard.html', { root: frontendPath });
+        } else {
+            res.sendFile('index.html', { root: frontendPath });
+        }
     } catch (error) {
         res.send(`
             <!DOCTYPE html>
             <html>
-            <head><title>Supply Chain Halal</title></head>
-            <body style="font-family: Arial; text-align: center; padding: 50px;">
-                <h1>🌙 Supply Chain Halal</h1>
-                <p>Server is running, but dashboard file not found.</p>
-                <p>API is functional: <a href="/api/stats">/api/stats</a></p>
+            <head>
+                <title>Supply Chain Halal</title>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: Arial; text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+                    .card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 30px; max-width: 600px; margin: 0 auto; }
+                    h1 { margin-bottom: 20px; }
+                    a { color: white; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h1>🌙 Supply Chain Halal</h1>
+                    <p>Server is running!</p>
+                    <p>API is functional: <a href="/api/stats">/api/stats</a></p>
+                </div>
             </body>
             </html>
         `);
     }
+});
+
+// Dashboard route
+app.get('/dashboard', (req, res) => {
+    res.sendFile('dashboard.html', { root: frontendPath });
+});
+
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile('dashboard.html', { root: frontendPath });
 });
 
 // Get blockchain info
@@ -124,7 +170,7 @@ app.post('/api/transaction/add', async (req, res) => {
             throw new Error('ZKP Manager not initialized');
         }
         
-        const zkResult = await zkpManager.generateProof(locationData, productData.id);
+        const zkResult = await zkpManager.generateProof(locationData, productData?.id);
         const isValidProof = await zkpManager.verifyProof(zkResult.proof, zkResult.publicSignals);
         
         if (!isValidProof || !zkResult.isCertified) {
@@ -199,6 +245,31 @@ app.get('/api/mine', (req, res) => {
     }
 });
 
+// Tamper block (immutability demo)
+app.post('/api/demo/tamper', (req, res) => {
+    const { blockIndex, newData } = req.body;
+    
+    if (!halalChain || !halalChain.tamperBlock) {
+        return res.json({
+            tampered: false,
+            isChainValid: true,
+            message: 'Tamper demo not available'
+        });
+    }
+    
+    const originalHash = halalChain.chain[blockIndex]?.hash;
+    const tampered = halalChain.tamperBlock(blockIndex, newData);
+    const isStillValid = halalChain.isChainValid();
+    
+    res.json({
+        tampered: tampered,
+        originalHash: originalHash,
+        newHash: halalChain.chain[blockIndex]?.hash,
+        isChainValid: isStillValid,
+        message: isStillValid ? '⚠️ Chain still valid (BUG!)' : '✅ Chain broken! Immutability works!'
+    });
+});
+
 // ZKP endpoints
 app.get('/api/zkp/explain', (req, res) => {
     try {
@@ -224,6 +295,54 @@ app.get('/api/zkp/certified-locations', (req, res) => {
     }
 });
 
+// Fake proof test (penetration testing)
+app.post('/api/zkp/test-fake-proof', async (req, res) => {
+    try {
+        const fakeResult = await zkpManager.generateFakeProof();
+        const isValid = await zkpManager.verifyProof(fakeResult.proof, fakeResult.publicSignals);
+        
+        res.json({
+            testName: 'Fake ZKP Injection',
+            proofWasAccepted: isValid,
+            isSecure: !isValid,
+            message: isValid ? '❌ VULNERABILITY!' : '✅ SECURE'
+        });
+    } catch (error) {
+        res.json({ error: error.message });
+    }
+});
+
+// Stress test endpoint
+app.post('/api/stress/send', async (req, res) => {
+    const { count } = req.body;
+    const startTime = Date.now();
+    const txCount = Math.min(count || 50, 100);
+    
+    for (let i = 0; i < txCount; i++) {
+        const mockLocation = { id: "CERT-HALAL-001", name: "Test Location" };
+        const mockProduct = { id: `STRESS-${i}`, name: `Product ${i}` };
+        await zkpManager.generateProof(mockLocation, mockProduct.id);
+    }
+    
+    const totalTime = Date.now() - startTime;
+    const tps = (txCount / totalTime) * 1000;
+    
+    res.json({
+        totalTransactions: txCount,
+        totalTimeMs: totalTime,
+        tps: tps.toFixed(2),
+        averageLatencyMs: (totalTime / txCount).toFixed(2)
+    });
+});
+
+// Storage info
+app.get('/api/storage/info', (req, res) => {
+    res.json({
+        onChain: onChainStorage?.getInfo() || { type: 'onchain', size: 0 },
+        offChain: offChainStorage?.getInfo() || { type: 'offchain', size: 0 }
+    });
+});
+
 // Stats endpoint
 app.get('/api/stats', (req, res) => {
     try {
@@ -238,7 +357,7 @@ app.get('/api/stats', (req, res) => {
             },
             consensus: {
                 type: 'Proof of Work (Educational)',
-                nodes: 5
+                nodes: halalChain?.consortiumNodes?.length || 5
             },
             zkp: {
                 status: 'Active',
@@ -253,7 +372,7 @@ app.get('/api/stats', (req, res) => {
     }
 });
 
-// Simple test endpoint
+// Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'API is working!', 
@@ -267,10 +386,11 @@ app.use('*', (req, res) => {
     res.status(404).json({ 
         error: 'Endpoint not found',
         availableEndpoints: [
-            '/', '/health', '/api/stats', '/api/test',
+            '/', '/dashboard', '/health', '/api/stats', '/api/test',
             '/api/blockchain/info', '/api/blockchain/blocks',
-            '/api/transaction/add', '/api/mine',
-            '/api/zkp/explain', '/api/zkp/certified-locations'
+            '/api/transaction/add', '/api/mine', '/api/demo/tamper',
+            '/api/zkp/explain', '/api/zkp/certified-locations', '/api/zkp/test-fake-proof',
+            '/api/stress/send', '/api/storage/info'
         ]
     });
 });
