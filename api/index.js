@@ -41,25 +41,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files dari frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
 
-// Inisialisasi komponen dengan error handling
-let halalChain, zkpManager, onChainStorage, offChainStorage;
+// Root endpoint - serve dashboard.html
+app.get('/', (req, res) => {
+    res.sendFile('dashboard.html', { root: frontendPath });
+});
 
-try {
-    halalChain = new Blockchain();
-    zkpManager = new ZKPManager();
-    onChainStorage = new OnChainStorage();
-    offChainStorage = new OffChainStorage();
-    console.log('✅ Components initialized successfully');
-} catch (error) {
-    console.error('Error initializing components:', error.message);
-    // Fallback komponen
-    halalChain = { chain: [{ index: 0, hash: 'genesis', transactions: [] }], difficulty: 4 };
-    zkpManager = new ZKPManager();
-    onChainStorage = { getInfo: () => ({ size: 0 }) };
-    offChainStorage = { getInfo: () => ({ size: 0 }) };
-}
+// Explicit route untuk dashboard.html
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile('dashboard.html', { root: frontendPath });
+});
 
 // ==================== API ROUTES ====================
 
