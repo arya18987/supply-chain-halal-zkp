@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Chain Halal - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-left: 4px solid #667eea;
+            padding-left: 12px;
+        }
+
+        .card h3 {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat .label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Result */
+        .result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .result.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        /* Block Explorer */
+        .blocks-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .block-content {
+            font-size: 11px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌙 Supply Chain Halal & Etis</h1>
+            <p>Blockchain dengan Zero-Knowledge Proof | Konsorsium: BPJPH · MUI · Produsen · Distributor · Retailer</p>
+        </header>
+
+        <!-- Status Card -->
+        <div class="status-card">
+            <h2>📊 Status Blockchain</h2>
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="label">Block Height</div>
+                    <div class="value" id="blockHeight">0</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Difficulty</div>
+                    <div class="value" id="difficulty">4</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Chain Valid</div>
+                    <div class="value" id="chainValid" style="color: #28a745;">✅ Valid</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Pending TX</div>
+                    <div class="value" id="pendingTx">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('zkp')">🔒 Verifikasi ZKP</button>
+            <button class="tab-btn" onclick="showTab('mining')">⛏️ Mining</button>
+            <button class="tab-btn" onclick="showTab('security')">🔐 Keamanan</button>
+            <button class="tab-btn" onclick="showTab('explorer')">📦 Explorer</button>
+            <button class="tab-btn" onclick="showTab('stress')">⚡ Stress Test</button>
+        </div>
+
+        <!-- Tab 1: ZKP -->
+        <div id="tab-zkp" class="tab-content active">
+            <div class="card">
+                <h2>🔒 Verifikasi Produk dengan ZKP</h2>
+                <div class="form-group">
+                    <label>Nama Produk</label>
+                    <input type="text" id="productName" placeholder="Contoh: Daging Ayam Sertifikasi Halal">
+                </div>
+                <div class="form-group">
+                    <label>ID Produk</label>
+                    <input type="text" id="productId" placeholder="PROD-001">
+                </div>
+                <div class="form-group">
+                    <label>Lokasi Asal</label>
+                    <input type="text" id="locationName" placeholder="Peternakan Halal Sumber Makmur">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="text" id="latitude" placeholder="-7.9818">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="text" id="longitude" placeholder="112.6264">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="verifyProduct()">✅ Verifikasi dengan ZKP</button>
+                <div id="zkpResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Mining -->
+        <div id="tab-mining" class="tab-content">
+            <div class="card">
+                <h2>⛏️ Proof of Work Mining</h2>
+                <div class="form-group">
+                    <label>Miner Address</label>
+                    <input type="text" id="minerAddress" value="BPJPH-Certifier">
+                </div>
+                <button class="btn btn-success" onclick="mineBlock()">🔨 Mine Block</button>
+                <div id="miningResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Security -->
+        <div id="tab-security" class="tab-content">
+            <div class="card">
+                <h2>🔐 Demo Immutability</h2>
+                <div class="form-group">
+                    <label>Block Index</label>
+                    <input type="number" id="tamperIndex" value="1" min="1">
+                </div>
+                <button class="btn btn-danger" onclick="tamperBlock()">⚠️ Coba Ubah Data Block</button>
+                <div id="tamperResult" class="result"></div>
+            </div>
+            <div class="card">
+                <h2>🛡️ Penetration Test</h2>
+                <button class="btn btn-secondary" onclick="runPenTest()">🔍 Run Pen Test</button>
+                <div id="penTestResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Explorer -->
+        <div id="tab-explorer" class="tab-content">
+            <div class="card">
+                <h2>📦 Blockchain Explorer</h2>
+                <button class="btn btn-secondary btn-sm" onclick="loadBlocks()">🔄 Refresh</button>
+                <div id="blocksContainer" class="blocks-container" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Stress Test -->
+        <div id="tab-stress" class="tab-content">
+            <div class="card">
+                <h2>⚡ Stress Test</h2>
+                <div class="form-group">
+                    <label>Jumlah Transaksi</label>
+                    <input type="number" id="stressCount" value="50" min="1" max="200">
+                </div>
+                <button class="btn btn-primary" onclick="runStressTest()">🚀 Run Stress Test</button>
+                <div id="stressResult" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadStatus() {
+            try {
+                const res = await fetch(`${API}/api/blockchain/info`);
+                const data = await res.json();
+                document.getElementById('blockHeight').innerText = data.chainLength;
+                document.getElementById('difficulty').innerText = data.difficulty;
+                document.getElementById('pendingTx').innerText = data.pendingTransactions;
+            } catch (e) {
+                console.error('Error loading status:', e);
+            }
+        }
+
+        async function verifyProduct() {
+            const productName = document.getElementById('productName').value;
+            const productId = document.getElementById('productId').value;
+            const locationName = document.getElementById('locationName').value;
+            const lat = parseFloat(document.getElementById('latitude').value) || -7.9818;
+            const lng = parseFloat(document.getElementById('longitude').value) || 112.6264;
+
+            if (!productName || !productId) {
+                showResult('zkpResult', 'Isi semua field!', 'error');
+                return;
+            }
+
+            showResult('zkpResult', '🔐 Menghasilkan Zero-Knowledge Proof...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/transaction/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fromAddress: 'Producer',
+                        toAddress: 'Distributor',
+                        amount: 100,
+                        productData: { id: productId, name: productName },
+                        locationData: { id: 'CERT-HALAL-001', name: locationName, latitude: lat, longitude: lng }
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showResult('zkpResult', `✅ ${data.message}<br>⏱️ Time: ${data.zkpResult.generationTime}ms`, 'success');
+                    loadStatus();
+                } else {
+                    showResult('zkpResult', `❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('zkpResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function mineBlock() {
+            const miner = document.getElementById('minerAddress').value;
+            showResult('miningResult', '⛏️ Mining block...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/mine?minerAddress=${miner}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    showResult('miningResult', `✅ Block #${data.block.index} mined!<br>⏱️ ${data.miningTime}ms<br>🔨 Nonce: ${data.block.nonce}`, 'success');
+                    loadStatus();
+                    loadBlocks();
+                } else {
+                    showResult('miningResult', `❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('miningResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function tamperBlock() {
+            const index = parseInt(document.getElementById('tamperIndex').value);
+            showResult('tamperResult', '🔐 Mencoba mengubah block...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/demo/tamper`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ blockIndex: index, newData: [{ tampered: true }] })
+                });
+                const data = await res.json();
+
+                if (!data.isChainValid) {
+                    showResult('tamperResult', `✅ ${data.message}<br>Original Hash: ${data.originalHash?.substring(0, 30)}...<br>New Hash: ${data.newHash?.substring(0, 30)}...`, 'success');
+                } else {
+                    showResult('tamperResult', `⚠️ ${data.message}`, 'error');
+                }
+                loadStatus();
+            } catch (error) {
+                showResult('tamperResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runPenTest() {
+            showResult('penTestResult', '🔍 Menjalankan penetration test...', 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/zkp/test-fake-proof`, { method: 'POST' });
+                const data = await res.json();
+                showResult('penTestResult', `🛡️ ${data.message}<br>Fake proof accepted: ${data.proofWasAccepted}`, data.isSecure ? 'success' : 'error');
+            } catch (error) {
+                showResult('penTestResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runStressTest() {
+            const count = parseInt(document.getElementById('stressCount').value);
+            showResult('stressResult', `⚡ Running stress test with ${count} transactions...`, 'loading');
+
+            try {
+                const res = await fetch(`${API}/api/stress/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ count: count })
+                });
+                const data = await res.json();
+                showResult('stressResult', `📊 TPS: ${data.tps}<br>⏱️ Total Time: ${data.totalTimeMs}ms<br>📈 Avg Latency: ${data.averageLatencyMs}ms`, 'success');
+            } catch (error) {
+                showResult('stressResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadBlocks() {
+            const container = document.getElementById('blocksContainer');
+            container.innerHTML = '<div class="result loading">Loading blocks...</div>';
+
+            try {
+                const res = await fetch(`${API}/api/blockchain/blocks`);
+                const blocks = await res.json();
+
+                if (blocks.length === 0) {
+                    container.innerHTML = '<div class="result error">No blocks found</div>';
+                    return;
+                }
+
+                container.innerHTML = blocks.map(block => `
+                    <div class="block">
+                        <div class="block-header">
+                            <span>🔗 Block #${block.index}</span>
+                            <span>${new Date(block.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                        <div class="block-content">
+                            <div><strong>Hash:</strong> ${block.hash}</div>
+                            <div><strong>Previous:</strong> ${block.previousHash}</div>
+                            <div><strong>Nonce:</strong> ${block.nonce}</div>
+                            <div><strong>Transactions:</strong> ${block.transactions?.length || 0}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function showResult(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = message;
+            el.className = `result ${type}`;
+            setTimeout(() => {
+                if (el.className === `result ${type}`) {
+                    el.style.display = 'block';
+                }
+            }, 100);
+        }
+
+        // Auto refresh
+        setInterval(() => {
+            loadStatus();
+            if (document.getElementById('tab-explorer').classList.contains('active')) {
+                loadBlocks();
+            }
+        }, 5000);
+
+        // Initial load
+        loadStatus();
+        loadBlocks();
+    </script>
+</body>
+</html>
